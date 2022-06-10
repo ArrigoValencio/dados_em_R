@@ -1,0 +1,312 @@
+---
+title: "Exploring the BRFSS data"
+output:
+  pdf_document: default
+  html_document:
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+## Setup
+
+### Load packages
+
+```{r load-packages, message = FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+### Load data
+
+```{r load-data}
+load("brfss2013.gz")
+```
+
+
+
+* * *
+
+## Part 1: Data
+
+
+The data used in this final project came from The Behavioral Risk Factor Surveillance System (BRFSS), a collaborative project, measuring behavioral risk factors for the non-institutionalized adult population residing in the US. The data are collected by land-line telephone and/or cellular telephone, since 2011, and by land-line telephone, only, between 1984 and 2011. In the former way of collecting data, a randomly selected adult in a household was interviewed. After 2011, beyond that, an adult with private residence or college housing had data collected from them by a cellular version of the BRFSS questionnaire.
+
+In this sense, the work in this exploratory data analysis project comprehend observational studies, given the characteristics of data collection. Developing three research questions, their results regard only on population-target, in the period in which the data was collected (2013), being not recommended generalizations. Furthermore, this kind of study allows, when appropriate, to attribute association but not causality between variables.
+
+* * *
+
+## Part 2: Research questions
+
+
+**Research question 1:**
+
+Is employ status associated with depression disorder?
+
+This question emerge in the hypothetical context of relation between job conditions and health (specifically mental health). 
+
+**Research question 2:**
+
+In households with at least a child, is there any difference in the average sleep rate between male and female? 
+
+This question emerge in a hypothetical context in which women dedicates more time caring about children when compared to men.
+
+**Research question 3:**
+
+Based on the State with the higher number of Americans saying their household income is '$75,000 or more' (the highest category): in this range of income, what is the probability of one who live in this State has college graduate education level?
+
+This question emerge in the hypothetical context of relation between income and education level.
+
+* * *
+
+## Part 3: Exploratory data analysis
+
+
+**Research question 1:**
+
+The objective is to answer the research question 1:
+
+Is employ status associated with depression disorder?
+
+In this step we want to get the first impressions on the data. It is important to know the type of variables that is going to be analysed. In this case, both of them are classified as categorical variables:
+
+```{r}
+str(brfss2013$employ1)
+
+str(brfss2013$addepev2)
+```
+
+The first variable, 'employ1', regards the respondents employ status. The second
+one, 'addepev2', our variable of interest, brings the information of If a health professional ever told people interviewed had a depressive disorder:
+
+```{r}
+brfss2013 %>%
+  group_by(employ1) %>%
+  summarise(count = n())
+
+brfss2013 %>%
+  group_by(addepev2) %>%
+  summarise(count = n())
+```
+
+We can see above more details about the two variables, the number of respondents 
+in each level. It is interesting to observe that both variables contain the 
+category 'NA', which means values that are not available (also known as missing values). For our exploratory data analysis we want to take those missing values 
+out (this kind of procedure extends to the others research questions analysis). Following NA extract, we want to visualize the data in a better way. So that,
+we create a bar plot, as the variables analysed are categorical ones, and observe
+the distribution of those variables:
+
+```{r fig.height = 10, fig.width = 15}
+brfss2013 %>%
+  filter(!is.na(employ1), !is.na(addepev2)) %>%
+  ggplot(aes(x = employ1)) + 
+  geom_bar(aes(fill = addepev2))
+```
+
+Through the figure we are able to see the employ status categories and if, into 
+those categories, a health professional already told the respondent had depressive disorder. In other words, it shows the proportion of people that have already told suffering of depressive disorder by employ category. What we have to pay attention for is the proportion of people that say to be unable to work and, at the same time, already told have depression disorder. The figure shows this proportion for the category 'unable to work' bigger than for the other ones.
+
+From this point, and based on the research question 1, It needs to develop an analyses building up evidence that employ status (if one is employed for wages, self employed, home maker, unable to work, etc.) is associated with depression disorder. The (alternative) hypothesis is that those variables are associated.
+
+First, we have got the number of observations in the data. Following this,
+let's see the probability a health professional already told respondents had depressive disorder in overall american population, based in the interview in BRFSS: 
+```{r}
+num_obv <- brfss2013 %>%
+  filter(!is.na(employ1), !is.na(addepev2)) %>%
+  summarise(length(addepev2))
+
+num_obv <- as.numeric(num_obv)
+
+brfss2013 %>%
+  filter(!is.na(employ1), !is.na(addepev2), addepev2 == 'Yes') %>%
+  summarise(prob_dd = as.numeric(length(addepev2))/num_obv)
+```
+
+Around 19,6 % of population already told had depressive disorder. We saw, through the bar plot, that the category 'unable to work' holds higher proportion of depression disorder compared to other categories. In this sense, we want to know, based on the data, the probability that an american had told she/he had depressive disorder since being unable to work. In other terms, we want to know the conditional probability which formulation follows below:
+
+P(addepev2 = Yes|employ1 = Unable to work)
+
+To calculate the probability from the data, it is interesting to see the variables in a specific way, as below:
+
+```{r}
+brfss2013 %>%
+  filter(!is.na(employ1), !is.na(addepev2)) %>%
+  group_by(employ1, addepev2) %>%
+  summarise(count_n = n())
+```
+
+The conditional probability written above can be calculated by the number of observation that was already told have depressive disorder and are unable to work divided by the overall observations that are unable to work. Handling those information, it calculates the conditional probability we want ('prob_dduw'):
+
+```{r}
+prob_dduw <- 20109/(20109+16984)
+
+  print(prob_dduw)
+```
+
+About 54,2 % of those that are unable to work was already told she/he have depressive disorder. Using the theoretical principle of independence in our practical issue, it is known that:
+
+P(addepev2 = Yes|employ1 = Unable to work) = P(addepev2 = Yes)
+
+If the equality explicit above holds, it means that the variables are independent. Although, as seen before, the probability an american already told she/he had depressive disorder ('prob_dd') is about 19,6 %, significantly lower than the rate of depressive disorder between those that are unable to work. This information suggests that the two variables analysed are dependent. So that, the (alternative) hypothesis that employ status and depressive disorder are associated holds.
+
+
+**Research question 2:**
+
+The objective is to answer the research question 2: 
+
+In households with at least a child, is there any difference in the average sleep rate between male and female? 
+
+The first step is to check if there is an association between number of hours of sleep and the number of children in household. Before it, we see the type of variables:  
+
+```{r}
+str(brfss2013$sleptim1)
+
+str(brfss2013$children)
+```
+
+Both variables, 'sleptim1' and 'children' are discrete numerical ones. So, it is used histograms, in a first moment, to observe their distributions:
+
+```{r}
+brfss2013 %>%
+  filter(sleptim1 <= 24) %>%
+  ggplot(aes(x = sleptim1)) + 
+  geom_histogram ()
+
+brfss2013 %>%
+  filter(!is.na(children)) %>%
+  ggplot(aes(x = children)) + 
+  geom_histogram (binwidth = 1)
+```
+
+An detail in the coding of the 'sleptim1' histogram is that the observations are restricted to values lower or equal to 24, once the maximum hours of sleep is 24.
+
+The variable 'hours of sleep in a 24-hours-interval' has, approximated, a normal distribution, which fits with distribution visualization based on histograms. In the other hand, the 'number of children in household' variable has a right skewed distribution. So that, for this second case, we change the way of visualizing it from histogram to a box plot:
+
+```{r}
+brfss2013 %>%
+  filter(!is.na(children)) %>%
+  ggplot(aes(x = children)) + 
+  geom_boxplot ()
+```
+
+Based on this, it is useful to see, also, some basics statistics of those variables (considering the distribution of the second variable, we look for robust statistics in its case):
+ 
+```{r}
+brfss2013 %>%
+  filter(sleptim1 <= 24) %>%
+  summarise(sleep_mean = mean(sleptim1), sleep_sd = sd(sleptim1))
+
+brfss2013 %>%
+  filter(!is.na(children)) %>%
+  summarise(children_median = median(children), children_iqr = IQR(children))
+```
+ 
+Concluding this first step, it is plotted a scatter plot, allowing to observe the association between the variables:
+
+```{r}
+brfss2013 %>%
+    filter(sleptim1 <= 24, !is.na(children)) %>%
+    ggplot(aes(x = children, y = sleptim1)) + 
+    geom_point()
+```
+
+We are able to see in this figure above a negative association between 'children' and 'sleptim1'. More children in the household, less hours of sleep, on average.
+
+The second step is to build the variable - that appears in research question 2 - called 'sleep rate'. It is the number of hours of sleep for 'unit' of child in household. We need this variable to investigate if there is any difference in the average of sleep rate between male and female. The idea is that women spend more time with children than men (as parents or any other kind of responsible), which it would lead to lower sleep rate for women, on average. 
+
+It is build the sleep rate below ('sleep_rate'), considering households that have at least a child (although it has a justification to choose households with at least one child, which is always to compare when there is one child or more, there is other practical/mathematical reason for that: divide something - hours of sleep - to zero - no child at home - results in a non finite value). And, also, it is compared the measures of center between male and female:
+
+```{r}
+brfss2013 %>%
+    filter(sleptim1 <= 24, children > 0, !is.na(sex)) %>%
+    mutate(sleep_rate = sleptim1/children) %>%
+    group_by(sex) %>%
+    summarise(mean_rate = mean(sleep_rate), median_rate = median(sleep_rate),
+              sd_rate = sd(sleep_rate), iqr_rate = IQR(sleep_rate))
+```
+
+Clarifying the results, we have in the first column 'sex' - 'male' and 'female'; the second column 'mean_rate', third 'median_rate', fourth 'sd_rate', fifth 'iqr_rate', respectively: sleep rate mean, sleep rate median, sleep rate standard deviation and sleep rate IQR.
+
+For any measure of center and variability it is not possible to say that there is a significant difference in the average sleep rate between male and female.
+
+
+**Research question 3:**
+
+The objective is to answer the research question 3:
+
+Based on the State with the higher number of Americans saying their household income is '$75,000 or more' (the highest category): in this range of income, what is the probability of one who live in this State has college graduate education level?
+
+It begins knowing the variables of income, 'income2', and State, 'X_state':
+
+```{r}
+str(brfss2013$income2)
+
+str(brfss2013$X_state)
+```
+
+Both are categorical variables. We want to determine, in a first step, the State with the higher number of Americans that say their households have a '$75,000 or more' income level, and it is identified below:
+
+```{r}
+brfss2013 %>%
+  filter(income2 =='$75,000 or more', !is.na(X_state)) %>%
+  group_by(X_state) %>%
+  summarise(count_n = n()) %>%
+  summarise(selected_state = X_state[which.max(count_n)])
+```
+
+The State with this characteristic ('selected_State') is the State of Florida. In this sense, this is the State from which the data will be explored. Following the rationale of the research question 3, the observations will be restricted to the '$75,000 or more' income level of Florida. 
+
+Starting the second step, let's take a look in the education level variable, 'educa':
+
+```{r}
+str(brfss2013$educa)
+```
+
+The variable 'educa' is a categorical variable with six levels. Thus, we observe, below, the distribution of education level into the category of '$75,000 or more' income level in Florida:
+
+```{r fig.height = 10, fig.width = 15}
+brfss2013 %>%
+  filter(X_state == 'Florida', income2 == '$75,000 or more', !is.na(educa)) %>%
+  ggplot(aes(x = educa)) + 
+  geom_bar()
+```
+
+The figure suggests a positive association between income and education level for the State of Florida, at least in the stract of higher level of income. 
+
+The end point of or research is the probability of who live in Florida and has a household with $75,000 or more of income level to have a college graduate. Considering that living in Florida is given, once the research delimits, at the beginning, this population as the population of interest, the formulation of the conditional probability we aim to find follows below:
+
+P(educa = 'college graduate'|income2 = '$75,000 or more)
+
+To complete the third step of the research we need to get the number of respondents that have college graduate and the number of overall respondents from Florida and has household income of $75,000 or more. The sequence is as it follows:
+
+```{r}
+brfss2013_filtered <- brfss2013 %>%
+  filter(X_state == 'Florida', income2 == '$75,000 or more', !is.na(educa)) %>%
+  group_by(educa) %>%
+  summarise(count_n = n()) %>%
+  print()
+
+brfss2013_filtered %>%
+  summarise(total = sum(count_n))
+```
+
+Above we have the number of observations (respondents) for each category of education level. The researcher is interested in those 'College 4 years or more (college graduate)', 3706 observations. Following it, comprehending 6035, the sum of those having a household income of $75,000 or more.
+
+Thus, the probability we want is easily calculated below:
+
+```{r}
+prob_CollegeGrad_florida <- 3706/6035
+
+print(prob_CollegeGrad_florida)
+```
+
+There is a probability around 61,4 % of who lives in Florida and household income of $75,000 or more to has a college graduate education level.
+
+
+
+
+
+
+
+
+
