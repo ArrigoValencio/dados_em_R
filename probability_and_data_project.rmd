@@ -53,7 +53,7 @@ This question emerge in a hypothetical context in which women dedicates more tim
 
 **Research question 3:**
 
-Based on the State with the higher number of Americans saying their household income is '$75,000 or more' (the highest category): in this range of income, what is the probability of one who live in this State has college graduate education level?
+Based on the State with the higher number of Americans saying their household income is '$75,000 or more' (the highest category): in this range of income, what is the probability of one who lives in this State has college graduate education level?
 
 This question emerge in the hypothetical context of relation between income and education level.
 
@@ -104,9 +104,9 @@ brfss2013 %>%
 ```
 
 Through the figure we are able to see the employ status categories and if, into 
-those categories, a health professional already told the respondent had depressive disorder. In other words, it shows the proportion of people that have already told suffering of depressive disorder by employ category. What we have to pay attention for is the proportion of people that say to be unable to work and, at the same time, already told have depression disorder. The figure shows this proportion for the category 'unable to work' bigger than for the other ones.
+those categories, a health professional already told the respondent had depressive disorder. In other words, it shows the proportion of people that have already told suffering of depressive disorder by employ category. What we have to pay attention for is the proportion of people that say to be unable to work and was, at the same time, already told have depression disorder. The figure shows this proportion for the category 'unable to work' bigger than for the other ones.
 
-From this point, and based on the research question 1, It needs to develop an analyses building up evidence that employ status (if one is employed for wages, self employed, home maker, unable to work, etc.) is associated with depression disorder. The (alternative) hypothesis is that those variables are associated.
+From this point, and based on the research question 1, it needs to develop an analyses building up evidence that employ status (if one is employed for wages, self employed, home maker, unable to work, etc.) is associated with depression disorder. The (alternative) hypothesis is that those variables are associated.
 
 First, we have got the number of observations in the data. Following this,
 let's see the probability a health professional already told respondents had depressive disorder in overall american population, based in the interview in BRFSS: 
@@ -122,7 +122,7 @@ brfss2013 %>%
   summarise(prob_dd = as.numeric(length(addepev2))/num_obv)
 ```
 
-Around 19,6 % of population already told had depressive disorder. We saw, through the bar plot, that the category 'unable to work' holds higher proportion of depression disorder compared to other categories. In this sense, we want to know, based on the data, the probability that an american had told she/he had depressive disorder since being unable to work. In other terms, we want to know the conditional probability which formulation follows below:
+Around 19,6 % of population was already told had depressive disorder. We saw, through the bar plot, that the category 'unable to work' holds higher proportion of depression disorder compared to other categories. In this sense, we want to know, based on the data, the probability that an american was told she/he had depressive disorder since being unable to work. In other terms, we want to know the conditional probability which formulation follows below:
 
 P(addepev2 = Yes|employ1 = Unable to work)
 
@@ -135,7 +135,7 @@ brfss2013 %>%
   summarise(count_n = n())
 ```
 
-The conditional probability written above can be calculated by the number of observation that was already told have depressive disorder and are unable to work divided by the overall observations that are unable to work. Handling those information, it calculates the conditional probability we want ('prob_dduw'):
+The conditional probability written above can be calculated by the number of observation that was already told have depressive disorder and are unable to work divided by the overall observations that are unable to work. Handling those information, it calculates the conditional probability we want to('prob_dduw'):
 
 ```{r}
 prob_dduw <- 20109/(20109+16984)
@@ -178,7 +178,7 @@ brfss2013 %>%
   geom_histogram (binwidth = 1)
 ```
 
-An detail in the coding of the 'sleptim1' histogram is that the observations are restricted to values lower or equal to 24, once the maximum hours of sleep is 24.
+A detail in the coding of the 'sleptim1' histogram is that the observations are restricted to values lower or equal to 24, once the maximum hours of sleep is 24.
 
 The variable 'hours of sleep in a 24-hours-interval' has, approximated, a normal distribution, which fits with distribution visualization based on histograms. In the other hand, the 'number of children in household' variable has a right skewed distribution. So that, for this second case, we change the way of visualizing it from histogram to a box plot:
 
@@ -214,7 +214,7 @@ We are able to see in this figure above a negative association between 'children
 
 The second step is to build the variable - that appears in research question 2 - called 'sleep rate'. It is the number of hours of sleep for 'unit' of child in household. We need this variable to investigate if there is any difference in the average of sleep rate between male and female. The idea is that women spend more time with children than men (as parents or any other kind of responsible), which it would lead to lower sleep rate for women, on average. 
 
-It is build the sleep rate below ('sleep_rate'), considering households that have at least a child (although it has a justification to choose households with at least one child, which is always to compare when there is one child or more, there is other practical/mathematical reason for that: divide something - hours of sleep - to zero - no child at home - results in a non finite value). And, also, it is compared the measures of center between male and female:
+It is built the sleep rate below ('sleep_rate'), considering households that have at least a child (although it has a justification to choose households with at least one child, which is always to compare when there is one child or more, there is other practical/mathematical reason for that: divide something - hours of sleep - to zero - no child at home - results in a non finite value). And, also, it is compared the measures of center between male and female:
 
 ```{r}
 brfss2013 %>%
@@ -234,7 +234,7 @@ For any measure of center and variability it is not possible to say that there i
 
 The objective is to answer the research question 3:
 
-Based on the State with the higher number of Americans saying their household income is '$75,000 or more' (the highest category): in this range of income, what is the probability of one who live in this State has college graduate education level?
+Based on the State with the higher number of Americans saying their household income is '$75,000 or more' (the highest category): in this range of income, what is the probability of one who lives in this State has college graduate education level?
 
 It begins knowing the variables of income, 'income2', and State, 'X_state':
 
@@ -273,11 +273,11 @@ brfss2013 %>%
 
 The figure suggests a positive association between income and education level for the State of Florida, at least in the stract of higher level of income. 
 
-The end point of or research is the probability of who live in Florida and has a household with $75,000 or more of income level to have a college graduate. Considering that living in Florida is given, once the research delimits, at the beginning, this population as the population of interest, the formulation of the conditional probability we aim to find follows below:
+The end point of this research is the probability of who lives in Florida and has a household with $75,000 or more of income level to have a college graduate. Considering that living in Florida is given, once the research delimits, at the beginning, this population as the population of interest, the formulation of the conditional probability we aim to find follows below:
 
 P(educa = 'college graduate'|income2 = '$75,000 or more)
 
-To complete the third step of the research we need to get the number of respondents that have college graduate and the number of overall respondents from Florida and has household income of $75,000 or more. The sequence is as it follows:
+To complete the third step of the research we need to get the number of respondents that have college graduate and the number of overall respondents from Florida and have household income of $75,000 or more. The sequence is as it follows:
 
 ```{r}
 brfss2013_filtered <- brfss2013 %>%
